@@ -5,8 +5,8 @@ import machine
 GPIO_NUM = 2 # Builtin led (D4)
 
 # Wi-Fi configuration
-STA_SSID = "SSID"
-STA_PSK = "PASSWORD"
+STA_SSID = "ssid"
+STA_PSK = "password"
 
 # Disable AP interface
 ap_if = network.WLAN(network.AP_IF)
@@ -74,7 +74,7 @@ ESP8266WebServer.onPath("/cmd", handleCmd)
 ESP8266WebServer.onPath("/switch", handleSwitch)
 
 # Setting the path to documents
-ESP8266WebServer.setDocPath("/")
+ESP8266WebServer.setDocPath("/www")
 
 # Setting data for template
 ESP8266WebServer.setTplData(ledData)

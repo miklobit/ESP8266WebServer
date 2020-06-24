@@ -21,6 +21,12 @@ docPath = "/"
 # Data for template
 tplData = {}
 
+def fullPath(path):
+    if docPath == "/":
+        return path
+    else:
+        return docPath + path
+
 def begin(port):
     """Function to start http server
     """
@@ -63,17 +69,14 @@ def ok(socket, code, msg):
 def __fileExist(path):
     """Check for file existence
     """
-    print(path)
     try:
-        stat = os.stat(path)
+        stat = os.stat(fullPath(path))
         # stat[0] bit 15 / 14 -> file/dir
         if stat[0] & 0x8000 == 0x8000: # file
-            print("Found.")
             return True
         else:  # Dir
             return False
     except:
-        print("Not Found.")
         return False
 
 def handle(socket):
@@ -109,32 +112,33 @@ def handle(socket):
         err(socket, "501", "Not Implemented")
     elif path in handlers: # Check for registered path
         handlers[path](socket, args)
-    elif not path.startswith(docPath): # Check for path to any document
-        err(socket, "400", "Bad Request")
+#    elif not path.startswith(docPath): # Check for path to any document
+#        err(socket, "400", "Bad Request")
     else:
         filePath = path
         # find the file
         if not __fileExist(filePath):
-            filePath = path + ("index.html" if path.endswith("/") else "/index.html")
+            filePath = path + ("index.html" if path.endswith("/") else "/index.html")          
             # find index.html in the path
             if not __fileExist(filePath):
-                filePath = path + ("index.p.html" if path.endswith("/") else "/index.p.html")
+                filePath = path + ("index.p.html" if path.endswith("/") else "/index.p.html")               
                 # find index.p.html in the path
                 if not __fileExist(filePath):
                     err(socket, "404", "Not Found")
-                    return
-            
+                    return   
         # Responds the header first
         socket.write("HTTP/1.1 200 OK\r\n\r\n")
+        
+        print(filePath)
         # Responds the file content
         if filePath.endswith(".p.html"):
             print("template file.")
-            f = open(filePath, "r")
+            f = open(fullPath(filePath), "r")
             for l in f:
                 socket.write(l.format(**tplData))
             f.close()
         else:
-            f = open(filePath, "rb")
+            f = open(fullPath(filePath), "rb")
             while True:
                 data = f.read(64)
                 if (data == b""):
@@ -159,3 +163,4 @@ def setTplData(data):
     """
     global tplData
     tplData = data
+ 
